@@ -16,8 +16,16 @@ class TransactionForm extends StatelessWidget {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
 
-  void onAddTransactionPress() {
-    addTransaction(titleController.text, double.parse(amountController.text));
+  void handleSubmit() {
+    // SIMPLE VALUES VALIDATION
+    final title = titleController.text;
+    final amount = double.parse(amountController.text);
+
+    if (title.isEmpty || amount <= 0) {
+      return;
+    }
+
+    addTransaction(title, amount);
   }
 
   @override
@@ -31,15 +39,16 @@ class TransactionForm extends StatelessWidget {
             TextField(
               decoration: InputDecoration(labelText: 'Title'),
               controller: titleController,
-              // onChanged: (value) => titleInput = value,
+              onSubmitted: (_) => handleSubmit(),
             ),
             TextField(
               decoration: InputDecoration(labelText: 'Amount', suffixText: '€'),
               controller: amountController,
-              // onChanged: (value) => amountInput = value,
+              keyboardType: TextInputType.number,
+              onSubmitted: (_) => handleSubmit(),
             ),
             TextButton(
-              onPressed: onAddTransactionPress,
+              onPressed: handleSubmit,
               child: Text('Add Transaction'),
             ),
           ],
