@@ -5,59 +5,78 @@ import 'package:second_flutter_app/models/transaction.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
+  final Function deleteTransaction;
 
-  TransactionList(this.transactions);
+  TransactionList(this.transactions, this.deleteTransaction);
+
+  void hadleDeleteTransaction(String id) {
+    print('DELETING >>> $id');
+    deleteTransaction(id);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 300,
-      // IL BUILDER FA TUTTE LE OTTIMIZZAZIONI DI UNA RECYCLE VIEW (da utilizzare per liste lunghe)
-      child: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+    // IL BUILDER FA TUTTE LE OTTIMIZZAZIONI DI UNA RECYCLE VIEW (da utilizzare per liste lunghe)
+    return transactions.isEmpty
+        ? LayoutBuilder(builder: (ctx, constraints) {
+            return Column(
               children: [
-                // AMOUNT
+                Text('No transactions added yet!'),
+                SizedBox(height: 20),
                 Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(10),
-                  decoration:
-                      BoxDecoration(border: Border.all(color: Colors.grey)),
-                  child: Text(
-                    '${transactions[index].amount} €',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+                  height: constraints.maxHeight * 0.6,
+                  child: Image.asset(
+                    'assets/images/box.png',
+                    fit: BoxFit.cover,
                   ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // TITLE
-                    Container(
-                      margin: EdgeInsets.only(bottom: 5),
-                      child: Text(
-                        transactions[index].title,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                    ),
-                    // DATE
-                    Text(
-                      DateFormat().format(transactions[index].date),
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
                 )
               ],
-            ),
+            );
+          })
+        : ListView.builder(
+            padding: EdgeInsets.only(bottom: 75),
+            itemBuilder: (BuildContext context, int index) {
+              // CURRENT TRANSACTION
+              final transaction = transactions[index];
+
+              return Card(
+                elevation: 0.5,
+                margin: EdgeInsets.all(1),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: FittedBox(
+                        child: Text('${transaction.amount} €'),
+                      ),
+                    ),
+                    radius: 30,
+                  ),
+                  title: Text(
+                    transaction.title,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  subtitle: Text(
+                    DateFormat.yMMMd().format(transaction.date),
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  trailing:
+                      /*MediaQuery.of(context).size.width > 360
+                      ? TextButton.icon(
+                          onPressed: () =>
+                              hadleDeleteTransaction(transaction.id),
+                          icon: Icon(Icons.delete),
+                          label: Text('Remove transaction'),
+                        )
+                      : */
+                      IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () => hadleDeleteTransaction(transaction.id),
+                  ),
+                ),
+              );
+            },
+            itemCount: transactions.length,
           );
-        },
-        itemCount: transactions.length,
-      ),
-    );
   }
 }
